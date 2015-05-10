@@ -9,8 +9,8 @@
     "test": "./node_modules/.bin/mocha --harmony tests/*.js"
   },
   "devDependencies": {
-    "mocha": "^2.2.1",
-    "stream-buffers": "^2.1.0"
+    "co": "^4.5.4",
+    "mocha": "^2.2.1"
   },
   "author": "Ivan Kozik",
   "license": "ISC",

@@ -1,28 +1,40 @@
 "use strict";
 
 const chunker = require('..');
-const streamBuffers = require('stream-buffers');
+const assert = require('assert');
+const fs = require('fs');
+const co = require('co');
+const os = require('os');
 
 describe('chunker', function() {
-	it('chunks a stream into smaller streams', function() {
+	it('chunks a stream into smaller streams', co.wrap(function*() {
 		const inputSize = 1024*1024;
 		const chunkSize = 17*1024;
 
-		const buf = new Buffer(" ".repeat(inputSize));
-		const streamBuf = new streamBuffers.ReadableStreamBuffer({
-			frequency: 0,
-			chunkSize: 2048
-		});
+		const tempfname = `${os.tmpdir()}/chunker1mb`;
+		const f = fs.openSync(tempfname, 'w');
+		fs.writeSync(f, '\x00'.repeat(1024*1024));
+		fs.closeSync(f);
+
+		const inputStream = fs.createReadStream(tempfname);
+
 		let count = 0;
-		for(let chunkStream of chunker.chunk(streamBuf, 17*1024)) {
-			const writeBuf = new streamBuffers.WritableStreamBuffer();
-			chunkStream.pipe(writeBuf);
-			// TODO: do we need to wait here for writes to finish?
+		for(let chunkStream of chunker.chunk(inputStream, 17*1024)) {
+			let writeBuf = new Buffer(0);
+			const doneReading = new Promise(function(resolve, reject) {
+				chunkStream.on('data', function(data) {
+					writeBuf = writeBuf.concat([writeBuf, data]);
+				});
+				chunkStream.on('end', resolve);
+			});
+			yield doneReading;
+
 			if(count == Math.floor(inputSize / chunkSize)) {
-				assert.equal(" ".repeat(inputSize % chunkSize), chunkStream.getContentsAsString("utf-8"));
+				assert.equal('\x00'.repeat(inputSize % chunkSize), writeBuf.toString("utf-8"));
 			} else {
-				assert.equal(" ".repeat(chunkSize), chunkStream.getContentsAsString("utf-8"));
+				assert.equal('\x00'.repeat(chunkSize), writeBuf.toString("utf-8"));
 			}
+			count += 1;
 		}
-	});
+	}));
 });
