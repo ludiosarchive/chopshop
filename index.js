@@ -2,7 +2,6 @@
 
 const Readable = require('stream').Readable;
 const util = require('util');
-const assert = require('assert');
 
 function Chunk(inputStream, chunkSize, lastRemainder) {
 	Readable.call(this);
