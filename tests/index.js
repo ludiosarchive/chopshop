@@ -5,17 +5,20 @@ const assert = require('assert');
 const fs = require('fs');
 const co = require('co');
 const os = require('os');
+const crypto = require('crypto');
 
+// TODO: test 0-byte input source
+// TODO: test non-0-byte but 1-chunk input source
 // TODO: test with 1MB chunk size over 10.5MB file
 
 describe('chunker', function() {
 	it('chunks a stream into smaller streams', co.wrap(function*() {
-		const input = '\x00'.repeat(1024*1024);
+		const input = crypto.pseudoRandomBytes(1024*1024);
 		const chunkSize = 17*1024;
 
 		const tempfname = `${os.tmpdir()}/chunker1mb`;
 		const f = fs.openSync(tempfname, 'w');
-		fs.writeSync(f, input);
+		fs.writeSync(f, input, 0, input.length);
 		fs.closeSync(f);
 
 		const inputStream = fs.createReadStream(tempfname);
@@ -34,10 +37,10 @@ describe('chunker', function() {
 			yield doneReading;
 
 			if(count == Math.floor(input.length / chunkSize)) {
-				assert.equal('\x00'.repeat(input.length % chunkSize), writeBuf.toString("utf-8"));
+				assert.deepEqual(input.slice(chunkSize * count), writeBuf);
 			} else {
 				assert.equal(writeBuf.length, chunkSize);
-				assert.equal('\x00'.repeat(chunkSize), writeBuf.toString("utf-8"));
+				assert.deepEqual(input.slice(chunkSize * count, chunkSize * count + chunkSize), writeBuf);
 			}
 			count += 1;
 		}
