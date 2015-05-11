@@ -4,7 +4,7 @@ chopshop
 [![NPM version][npm-image]][npm-url]
 [![Build status][travis-image]][travis-url]
 
-chopshop takes an input io.js [stream](https://iojs.org/api/stream.html) and yields a series of fixed-length streams.  This is particularly useful if you need to convert a file into multiple files of size N.
+chopshop takes an io.js readable [stream](https://iojs.org/api/stream.html) and yields a series of fixed-length streams.  This is particularly useful if you need to convert a file into multiple files of size N.
 
 
 Install
@@ -26,7 +26,7 @@ npm install ludios/chopshop --save
 Example
 ---
 
-```
+```js
 "use strict";
 
 const chunk = require('chopshop').chunk;
@@ -34,7 +34,7 @@ const fs = require('fs');
 const co = require('co');
 
 co(function*() {
-	for(let chunkStream of chunk(fs.createReadStream('/etc/passwd'), 100)) {
+	for(const chunkStream of chunk(fs.createReadStream('/etc/passwd'), 100)) {
 		chunkStream.on('data', function(data) {
 			process.stdout.write(data);
 			console.log("\n" + data.length + "\n");
