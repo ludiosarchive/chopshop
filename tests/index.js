@@ -20,10 +20,11 @@ describe('chunker', function() {
 
 		let count = 0;
 		for(let chunkStream of chunker.chunk(inputStream, 17*1024)) {
+			console.log({count, chunkStream});
 			let writeBuf = new Buffer(0);
 			const doneReading = new Promise(function(resolve, reject) {
 				chunkStream.on('data', function(data) {
-					writeBuf = writeBuf.concat([writeBuf, data]);
+					writeBuf = Buffer.concat([writeBuf, data]);
 				});
 				chunkStream.on('end', resolve);
 			});
@@ -32,6 +33,7 @@ describe('chunker', function() {
 			if(count == Math.floor(inputSize / chunkSize)) {
 				assert.equal('\x00'.repeat(inputSize % chunkSize), writeBuf.toString("utf-8"));
 			} else {
+				assert.equal(writeBuf.length, chunkSize);
 				assert.equal('\x00'.repeat(chunkSize), writeBuf.toString("utf-8"));
 			}
 			count += 1;
