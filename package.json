@@ -1,7 +1,7 @@
 {
   "name": "chopshop",
   "version": "0.1.0",
-  "description": "Turn a readable stream into a generator yielding streams of max size N",
+  "description": "Chunks an io.js readable stream into multiple fixed-length streams",
   "homepage": "https://github.com/ludios/chopshop",
   "issues": "https://github.com/ludios/chopshop/issues",
   "main": "index.js",
