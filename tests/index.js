@@ -25,7 +25,7 @@ describe('chunker', function() {
 		inputStream.setMaxListeners(4096);
 
 		let count = 0;
-		for(let chunkStream of chunker.chunk(inputStream, 17*1024)) {
+		for(let chunkStream of chunker.chunk(inputStream, chunkSize)) {
 			//console.log({count, chunkStream});
 			let writeBuf = new Buffer(0);
 			const doneReading = new Promise(function(resolve, reject) {
