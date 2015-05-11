@@ -8,6 +8,15 @@ const os = require('os');
 const crypto = require('crypto');
 
 describe('chunker', function() {
+	it('throws Error for bad chunkSizes', function() {
+		for(let chunkSize of [0.5, -0.5, -2, false, "3"]) {
+			assert.throws(function() {
+				const c = chunker.chunk(null, chunkSize);
+				c.next();
+			}, /chunkSize must be/);
+		}
+	});
+
 	it('chunks a stream into smaller streams', co.wrap(function*() {
 		const params = [
 			 {inputSize: 0, chunkSize: 1}

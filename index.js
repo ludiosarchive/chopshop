@@ -70,8 +70,8 @@ Chunk.prototype._read = function() {
 };
 
 function* chunk(inputStream, chunkSize) {
-	if(chunkSize < 1) {
-		throw new Error("chunkSize must be >= 1");
+	if(!Number.isInteger(chunkSize) || chunkSize < 1) {
+		throw new Error("chunkSize must be an integer >= 1");
 	}
 	let lastChunk = null;
 	while(true) {
