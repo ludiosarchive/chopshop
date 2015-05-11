@@ -56,7 +56,6 @@ Chunk.prototype._stop = function() {
 };
 
 Chunk.prototype._handleInputRead = function(buf) {
-	//console.log({buf});
 	this._readBytes += buf.length;
 	const overage = this._readBytes - this._chunkSize;
 	if(overage >= 0) {
@@ -71,7 +70,6 @@ Chunk.prototype._handleInputRead = function(buf) {
 
 Chunk.prototype._read = function() {
 	let buf;
-	//console.log({date: new Date(), _lastRemainder: this._lastRemainder});
 	if(this._lastRemainder !== null) {
 		buf = this._lastRemainder;
 		this._lastRemainder = null;
