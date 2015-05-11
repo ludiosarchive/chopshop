@@ -23,6 +23,16 @@ npm install ludios/chopshop --save
 ```
 
 
+API
+---
+```js
+const chunk = require('chopshop').chunk;
+chunk(readableStream, maxBytes);
+```
+
+`chunk` returns an iterable of readable streams no larger than `maxBytes`.  You must finish reading a chunk before you start reading the next chunk.
+
+
 Example
 ---
 
