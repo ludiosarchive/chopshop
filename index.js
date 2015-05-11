@@ -28,11 +28,11 @@ function Chunk(inputStream, chunkSize, lastRemainder) {
 		if(this._stop || !this._waiting) {
 			return;
 		}
-		this._waiting = false;
 		var buf = this._inputStream.read();
 		if(buf === null) {
 			return;
 		}
+		this._waiting = false;
 		this._handleInputRead(buf);
 	}.bind(this));
 }
