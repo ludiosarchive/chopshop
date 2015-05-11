@@ -1,9 +1,10 @@
 {
   "name": "chopshop",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Chunks an io.js readable stream into multiple fixed-length streams",
   "homepage": "https://github.com/ludios/chopshop",
   "issues": "https://github.com/ludios/chopshop/issues",
+  "keywords": ["stream", "streams", "chunk", "chunker", "chunking"],
   "main": "index.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha tests/*.js"
