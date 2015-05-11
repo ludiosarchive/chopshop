@@ -7,6 +7,18 @@ const co = require('co');
 const os = require('os');
 const crypto = require('crypto');
 
+function streamToBuffer(stream) {
+	return new Promise(function(resolve, reject) {
+		let buf = new Buffer(0);
+		stream.on('data', function(data) {
+			buf = Buffer.concat([buf, data]);
+		});
+		stream.once('end', function() {
+			resolve(buf);
+		});
+	});
+}
+
 describe('chunker', function() {
 	it('throws Error for bad chunkSizes', function() {
 		for(let chunkSize of [0.5, -0.5, -2, false, "3"]) {
@@ -44,14 +56,7 @@ describe('chunker', function() {
 			let count = 0;
 			for(let chunkStream of chunker.chunk(inputStream, chunkSize)) {
 				//console.log({count, chunkStream});
-				let writeBuf = new Buffer(0);
-				const doneReading = new Promise(function(resolve, reject) {
-					chunkStream.on('data', function(data) {
-						writeBuf = Buffer.concat([writeBuf, data]);
-					});
-					chunkStream.once('end', resolve);
-				});
-				yield doneReading;
+				let writeBuf = yield streamToBuffer(chunkStream);
 
 				if(count == Math.floor(input.length / chunkSize)) {
 					assert.deepEqual(input.slice(chunkSize * count), writeBuf);
