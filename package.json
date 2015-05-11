@@ -6,7 +6,7 @@
   "issues": "https://github.com/ludios/chopshop/issues",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha --harmony tests/*.js"
+    "test": "./node_modules/.bin/mocha tests/*.js"
   },
   "devDependencies": {
     "co": "^4.5.4",
