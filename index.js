@@ -24,8 +24,6 @@ function Chunk(inputStream, chunkSize, lastRemainder) {
 	}
 
 	this._inputStream.on('end', this._boundInputEnd);
-	// We need to listen for this, to wake up the stream
-	// machinery's calls of our _read()
 	this._inputStream.on('readable', this._boundInputReadable);
 }
 util.inherits(Chunk, Readable);
