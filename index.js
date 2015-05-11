@@ -9,7 +9,6 @@ function Chunk(inputStream, chunkSize, lastRemainder) {
 
 	this._inputStream = inputStream;
 	this._chunkSize = chunkSize;
-	this._lastRemainder = lastRemainder;
 	this._remainder = null;
 	this._readBytes = 0;
 	this._stopped = false;
@@ -17,6 +16,13 @@ function Chunk(inputStream, chunkSize, lastRemainder) {
 	this._inputExhausted = false;
 	this._boundInputEnd = this._inputEnd.bind(this);
 	this._boundInputReadable = this._inputReadable.bind(this);
+
+	if(lastRemainder !== null) {
+		this._handleInputRead(lastRemainder);
+	}
+	if(this._stopped) {
+		return;
+	}
 
 	this._inputStream.on('end', this._boundInputEnd);
 	// We need to listen for this, to wake up the stream
@@ -69,18 +75,11 @@ Chunk.prototype._handleInputRead = function(buf) {
 };
 
 Chunk.prototype._read = function() {
-	let buf;
-	if(this._lastRemainder !== null) {
-		buf = this._lastRemainder;
-		this._lastRemainder = null;
-		this._handleInputRead(buf);
+	const buf = this._inputStream.read();
+	if(buf === null) {
+		this._waiting = true;
 	} else {
-		buf = this._inputStream.read();
-		if(buf === null) {
-			this._waiting = true;
-		} else {
-			this._handleInputRead(buf);
-		}
+		this._handleInputRead(buf);
 	}
 };
 
