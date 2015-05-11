@@ -20,7 +20,7 @@ describe('chunker', function() {
 
 		let count = 0;
 		for(let chunkStream of chunker.chunk(inputStream, 17*1024)) {
-			console.log({count, chunkStream});
+			//console.log({count, chunkStream});
 			let writeBuf = new Buffer(0);
 			const doneReading = new Promise(function(resolve, reject) {
 				chunkStream.on('data', function(data) {

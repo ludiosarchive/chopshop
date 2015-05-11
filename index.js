@@ -31,14 +31,14 @@ function Chunk(inputStream, chunkSize, lastRemainder) {
 util.inherits(Chunk, Readable);
 
 Chunk.prototype._handleInputRead = function(buf) {
-	console.log({buf});
+	//console.log({buf});
 	if(buf === null) {
 		this.push('');
 		return;
 	}
 	this._readBytes += buf.length;
 	const overage = this._readBytes - this._chunkSize;
-	console.log({overage});
+	//console.log({overage});
 	if(overage >= 0) {
 		this._stop = true;
 		this._remainder = buf.slice(buf.length - overage);
@@ -51,8 +51,7 @@ Chunk.prototype._handleInputRead = function(buf) {
 
 Chunk.prototype._read = function() {
 	let buf;
-	console.log(new Date());
-	console.log({_lastRemainder: this._lastRemainder});
+	//console.log({date: new Date(), _lastRemainder: this._lastRemainder});
 	if(this._lastRemainder !== null) {
 		buf = this._lastRemainder;
 		this._lastRemainder = null;
