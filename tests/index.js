@@ -23,6 +23,7 @@ describe('chunker', function() {
 			,{inputSize: 1, chunkSize: 1}
 			,{inputSize: 3, chunkSize: 2}
 			,{inputSize: 3, chunkSize: 10}
+			,{inputSize: 1024*1024, chunkSize: 100}
 			,{inputSize: 1024*1024, chunkSize: 1024*1024*10}
 			,{inputSize: 1024*1024, chunkSize: 17*1024}
 			,{inputSize: 1024*1024*4.5, chunkSize: 1024*1024}
@@ -39,7 +40,6 @@ describe('chunker', function() {
 			fs.closeSync(f);
 
 			const inputStream = fs.createReadStream(tempfname);
-			inputStream.setMaxListeners(4096);
 
 			let count = 0;
 			for(let chunkStream of chunker.chunk(inputStream, chunkSize)) {

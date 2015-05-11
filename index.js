@@ -12,38 +12,55 @@ function Chunk(inputStream, chunkSize, lastRemainder) {
 	this._lastRemainder = lastRemainder;
 	this._remainder = null;
 	this._readBytes = 0;
-	this._stop = false;
+	this._stopped = false;
 	this._waiting = false;
 	this._inputExhausted = false;
+	this._boundInputEnd = this._inputEnd.bind(this);
+	this._boundInputReadable = this._inputReadable.bind(this);
 
-	this._inputStream.once('end', function() {
-		this._stop = true;
-		this._inputExhausted = true;
-		this.push(null);
-	}.bind(this));
-
+	this._inputStream.on('end', this._boundInputEnd);
 	// We need to listen for this, to wake up the stream
 	// machinery's calls of our _read()
-	this._inputStream.on('readable', function() {
-		if(this._stop || !this._waiting) {
-			return;
-		}
-		var buf = this._inputStream.read();
-		if(buf === null) {
-			return;
-		}
-		this._waiting = false;
-		this._handleInputRead(buf);
-	}.bind(this));
+	this._inputStream.on('readable', this._boundInputReadable);
 }
 util.inherits(Chunk, Readable);
+
+Chunk.prototype._inputEnd = function() {
+	if(this._stopped) {
+		return;
+	}
+	this._stop();
+	this._inputExhausted = true;
+	this.push(null);
+};
+
+Chunk.prototype._inputReadable = function() {
+	if(this._stopped || !this._waiting) {
+		return;
+	}
+	var buf = this._inputStream.read();
+	if(buf === null) {
+		return;
+	}
+	this._waiting = false;
+	this._handleInputRead(buf);
+};
+
+Chunk.prototype._stop = function() {
+	if(this._stopped) {
+		return;
+	}
+	this._stopped = true;
+	this._inputStream.removeListener('end', this._boundInputEnd);
+	this._inputStream.removeListener('readable', this._boundInputReadable);
+};
 
 Chunk.prototype._handleInputRead = function(buf) {
 	//console.log({buf});
 	this._readBytes += buf.length;
 	const overage = this._readBytes - this._chunkSize;
 	if(overage >= 0) {
-		this._stop = true;
+		this._stop();
 		this._remainder = buf.slice(buf.length - overage);
 		this.push(buf.slice(0, buf.length - overage));
 		this.push(null);
