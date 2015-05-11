@@ -2,6 +2,7 @@
 
 const Readable = require('stream').Readable;
 const util = require('util');
+const assert = require('assert');
 
 function Chunk(inputStream, chunkSize, lastRemainder) {
 	Readable.call(this);
@@ -12,6 +13,7 @@ function Chunk(inputStream, chunkSize, lastRemainder) {
 	this._remainder = null;
 	this._readBytes = 0;
 	this._stop = false;
+	this._waiting = false;
 	this._inputExhausted = false;
 
 	this._inputStream.once('end', function() {
@@ -20,13 +22,17 @@ function Chunk(inputStream, chunkSize, lastRemainder) {
 		this.push(null);
 	}.bind(this));
 
-	// We need to listen for this once, to wake up the stream
+	// We need to listen for this, to wake up the stream
 	// machinery's calls of our _read()
-	this._inputStream.once('readable', function() {
-		if(this._stop) {
+	this._inputStream.on('readable', function() {
+		if(this._stop || !this._waiting) {
 			return;
 		}
+		this._waiting = false;
 		var buf = this._inputStream.read();
+		if(buf === null) {
+			return;
+		}
 		this._handleInputRead(buf);
 	}.bind(this));
 }
@@ -34,10 +40,6 @@ util.inherits(Chunk, Readable);
 
 Chunk.prototype._handleInputRead = function(buf) {
 	//console.log({buf});
-	if(buf === null) {
-		this.push('');
-		return;
-	}
 	this._readBytes += buf.length;
 	const overage = this._readBytes - this._chunkSize;
 	if(overage >= 0) {
@@ -56,13 +58,21 @@ Chunk.prototype._read = function() {
 	if(this._lastRemainder !== null) {
 		buf = this._lastRemainder;
 		this._lastRemainder = null;
+		this._handleInputRead(buf);
 	} else {
 		buf = this._inputStream.read();
+		if(buf === null) {
+			this._waiting = true;
+		} else {
+			this._handleInputRead(buf);
+		}
 	}
-	this._handleInputRead(buf);
 };
 
 function* chunk(inputStream, chunkSize) {
+	if(chunkSize < 1) {
+		throw new Error("chunkSize must be >= 1");
+	}
 	let lastChunk = null;
 	while(true) {
 		if(lastChunk && lastChunk._inputExhausted) {

@@ -7,20 +7,22 @@ const co = require('co');
 const os = require('os');
 const crypto = require('crypto');
 
-// TODO: test 0-byte input source
-// TODO: test non-0-byte but 1-chunk input source
-// TODO: test with 1MB chunk size over 10.5MB file
-
 describe('chunker', function() {
 	it('chunks a stream into smaller streams', co.wrap(function*() {
 		const params = [
-			 {inputSize: 1024*1024, chunkSize: 17*1024}
+			 {inputSize: 0, chunkSize: 1}
+			,{inputSize: 1, chunkSize: 1}
+			,{inputSize: 3, chunkSize: 2}
+			,{inputSize: 3, chunkSize: 10}
+			,{inputSize: 1024*1024, chunkSize: 1024*1024*10}
+			,{inputSize: 1024*1024, chunkSize: 17*1024}
 			,{inputSize: 1024*1024*4.5, chunkSize: 1024*1024}
 		];
 		for(let p of params) {
-			console.log(p);
-			const input = crypto.pseudoRandomBytes(p.inputSize);
+			//console.log(p);
+			const inputSize = p.inputSize;
 			const chunkSize = p.chunkSize;
+			const input = crypto.pseudoRandomBytes(inputSize);
 
 			const tempfname = `${os.tmpdir()}/chunkertest`;
 			const f = fs.openSync(tempfname, 'w');
@@ -50,6 +52,9 @@ describe('chunker', function() {
 				}
 				count += 1;
 			}
+
+			const expectedChunks = Math.floor((inputSize / chunkSize) + 1);
+			assert.equal(count, expectedChunks);
 		}
 	}));
 });
