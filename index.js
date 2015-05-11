@@ -11,6 +11,7 @@ function Chunk(inputStream, chunkSize, lastRemainder) {
 	this._lastRemainder = lastRemainder;
 	this._remainder = null;
 	this._readBytes = 0;
+	this._stop = false;
 	this._inputExhausted = false;
 	// TODO: need to remove this 'end' event to avoid small memory leak?
 	this._inputStream.on('end', function() {
@@ -18,6 +19,9 @@ function Chunk(inputStream, chunkSize, lastRemainder) {
 		this.push(null);
 	}.bind(this));
 	this._inputStream.on('readable', function() {
+		if(this._stop) {
+			return;
+		}
 		var buf = this._inputStream.read();
 		this._handleInputRead(buf);
 	}.bind(this));
@@ -32,9 +36,12 @@ Chunk.prototype._handleInputRead = function(buf) {
 	}
 	this._readBytes += buf.length;
 	const overage = this._readBytes - this._chunkSize;
-	if(overage > 0) {
+	console.log({overage});
+	if(overage >= 0) {
+		this._stop = true;
 		this._remainder = buf.slice(overage);
 		this.push(buf.slice(0, overage));
+		this.push(null);
 	} else {
 		this.push(buf);
 	}
