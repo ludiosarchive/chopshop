@@ -71,7 +71,7 @@ describe('chunker', function() {
 			,{inputSize: 3, chunkSize: 2}
 			,{inputSize: 3, chunkSize: 10}
 			,{inputSize: 1024*1024, chunkSize: 100}
-			,{inputSize: 1024*1024, chunkSize: 100*1024}
+			,{inputSize: 1024*1024, chunkSize: 128*1024}
 			,{inputSize: 1024*1024, chunkSize: 1024*1024*10}
 			,{inputSize: 1024*1024, chunkSize: 17*1024}
 			,{inputSize: 1024*1024*4.5, chunkSize: 1024*1024}
@@ -92,8 +92,8 @@ describe('chunker', function() {
 			let count = 0;
 			for(let chunkStream of chunker.chunk(inputStream, chunkSize)) {
 				//console.log({count, chunkStream});
-				//let writeBuf = yield streamToBuffer(chunkStream);
-				let writeBuf = yield streamToFileToBuffer(chunkStream);
+				let writeBuf = yield streamToBuffer(chunkStream);
+				//let writeBuf = yield streamToFileToBuffer(chunkStream);
 
 				if(count == Math.floor(input.length / chunkSize)) {
 					assert.deepEqual(input.slice(chunkSize * count), writeBuf);
@@ -104,7 +104,7 @@ describe('chunker', function() {
 				count += 1;
 			}
 
-			const expectedChunks = Math.floor((inputSize / chunkSize) + 1);
+			const expectedChunks = Math.max(1, Math.ceil(inputSize / chunkSize));
 			assert.equal(count, expectedChunks);
 		}
 	}));

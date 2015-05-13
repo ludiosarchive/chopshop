@@ -3,9 +3,10 @@
 const Readable = require('stream').Readable;
 const util = require('util');
 
-function Chunk(inputStream, chunkSize, lastRemainder) {
+function Chunk(count, inputStream, chunkSize, lastRemainder, lastInputExhausted) {
 	Readable.call(this);
 
+	this._count = count;
 	this._inputStream = inputStream;
 	this._chunkSize = chunkSize;
 	this._remainder = null;
@@ -13,28 +14,31 @@ function Chunk(inputStream, chunkSize, lastRemainder) {
 	this._stopped = false;
 	this._waiting = false;
 	this._inputExhausted = false;
-	this._boundInputEnd = this._inputEnd.bind(this);
-	this._boundInputReadable = this._inputReadable.bind(this);
+	this._lastRemainderLength = lastRemainder && lastRemainder.length;
+	this._lastInputExhausted = lastInputExhausted;
 
 	if(lastRemainder !== null) {
 		this._handleInputRead(lastRemainder);
 	}
-	if(this._stopped) {
-		return;
+	if(lastInputExhausted) {
+		this._inputEnd();
 	}
-
-	this._inputStream.on('end', this._boundInputEnd);
-	this._inputStream.on('readable', this._boundInputReadable);
 }
 util.inherits(Chunk, Readable);
 
+Chunk.prototype.inspect = function() {
+	return `<Chunk #${this._count}` +
+		` read ${this._readBytes}/${this._chunkSize}` +
+		` lastRemainder.length=${this._lastRemainderLength}` +
+		` lastInputExhausted=${this._lastInputExhausted}` +
+		` waiting=${this._waiting}` +
+		` stopped=${this._stopped}` +
+		`>`;
+};
+
 Chunk.prototype._inputEnd = function() {
-	if(this._stopped) {
-		return;
-	}
-	this._stop();
 	this._inputExhausted = true;
-	this.push(null);
+	this._stop();
 };
 
 Chunk.prototype._inputReadable = function() {
@@ -54,18 +58,16 @@ Chunk.prototype._stop = function() {
 		return;
 	}
 	this._stopped = true;
-	this._inputStream.removeListener('end', this._boundInputEnd);
-	this._inputStream.removeListener('readable', this._boundInputReadable);
+	this.push(null);
 };
 
 Chunk.prototype._handleInputRead = function(buf) {
 	this._readBytes += buf.length;
 	const overage = this._readBytes - this._chunkSize;
-	if(overage >= 0) {
-		this._stop();
+	if(overage > 0) {
 		this._remainder = buf.slice(buf.length - overage);
 		this.push(buf.slice(0, buf.length - overage));
-		this.push(null);
+		this._stop();
 	} else {
 		this.push(buf);
 	}
@@ -84,16 +86,37 @@ function* chunk(inputStream, chunkSize) {
 	if(!Number.isInteger(chunkSize) || chunkSize < 1) {
 		throw new Error("chunkSize must be an integer >= 1");
 	}
+	let count = 0;
 	let lastChunk = null;
+	function _end() {
+		lastChunk._inputEnd();
+	}
+	function _readable() {
+		lastChunk._inputReadable();
+	}
+	function _cleanup() {
+		inputStream.removeListener('end', _end);
+		inputStream.removeListener('readable', _readable);
+	}
+	inputStream.on('end', _end);
+	inputStream.on('readable', _readable);
 	while(true) {
-		lastChunk = new Chunk(inputStream, chunkSize, lastChunk && lastChunk._remainder);
+		lastChunk = new Chunk(
+			count,
+			inputStream,
+			chunkSize,
+			lastChunk && lastChunk._remainder,
+			lastChunk && lastChunk._inputExhausted);
 		yield lastChunk;
-		if(lastChunk._inputExhausted) {
+		if(lastChunk._inputExhausted && !lastChunk._remainder) {
+			_cleanup();
 			return;
 		}
 		if(!lastChunk._stopped) {
+			_cleanup();
 			throw new Error("Can't yield another chunk until the previous chunk is fully read");
 		}
+		count++;
 	}
 }
 
