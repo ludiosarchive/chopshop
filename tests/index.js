@@ -87,6 +87,8 @@ describe('chunker', function() {
 			fs.closeSync(f);
 
 			let inputStream = fs.createReadStream(tempfname);
+			// If doPassThrough, pipe data through a PassThrough stream,
+			// which changes the read size (?) and backpressure.
 			if(doPassThrough) {
 				const passThrough = new stream.PassThrough();
 				inputStream.pipe(passThrough);
@@ -95,7 +97,10 @@ describe('chunker', function() {
 
 			let count = 0;
 			for(let chunkStream of chunker.chunk(inputStream, chunkSize)) {
-				//console.log({count, chunkStream});
+				//console.log({chunkStream});
+				// Use streamToFileToBuffer instead of streamToBuffer to add some
+				// backpressure.  Needed to catch the lack-of-'end'-event bug
+				// present in chopshop 0.1.2.
 				//let writeBuf = yield streamToBuffer(chunkStream);
 				let writeBuf = yield streamToFileToBuffer(chunkStream);
 
@@ -114,12 +119,12 @@ describe('chunker', function() {
 	});
 
 	it('chunks a stream into smaller streams', function() {
-		this.timeout(6000);
+		this.timeout(8000);
 		return testChunking(false);
 	});
 
 	it('chunks a stream with extra buffering into smaller streams', function() {
-		this.timeout(6000);
+		this.timeout(8000);
 		return testChunking(true);
 	});
 });
