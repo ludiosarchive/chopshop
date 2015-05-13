@@ -7,6 +7,7 @@ const co = require('co');
 const os = require('os');
 const path = require('path');
 const crypto = require('crypto');
+const stream = require('stream');
 
 function streamToBuffer(stream) {
 	return new Promise(function(resolve, reject) {
@@ -62,9 +63,8 @@ describe('chunker', function() {
 		}, /until the previous chunk is fully read/);
 	});
 
-	it('chunks a stream into smaller streams', co.wrap(function*() {
-		this.timeout(5000);
-
+	const testChunking = co.wrap(function*(doPassThrough) {
+		//this.timeout(5000);
 		const params = [
 			 {inputSize: 0, chunkSize: 1}
 			,{inputSize: 1, chunkSize: 1}
@@ -87,7 +87,12 @@ describe('chunker', function() {
 			fs.writeSync(f, input, 0, input.length);
 			fs.closeSync(f);
 
-			const inputStream = fs.createReadStream(tempfname);
+			let inputStream = fs.createReadStream(tempfname);
+			if(doPassThrough) {
+				const passThrough = new stream.PassThrough();
+				inputStream.pipe(passThrough);
+				inputStream = passThrough;
+			}
 
 			let count = 0;
 			for(let chunkStream of chunker.chunk(inputStream, chunkSize)) {
@@ -107,5 +112,13 @@ describe('chunker', function() {
 			const expectedChunks = Math.max(1, Math.ceil(inputSize / chunkSize));
 			assert.equal(count, expectedChunks);
 		}
-	}));
+	});
+
+	it('chunks a stream into smaller streams', function() {
+		return testChunking(false);
+	});
+
+	it('chunks a stream with extra buffering into smaller streams', function() {
+		return testChunking(true);
+	});
 });
