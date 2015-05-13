@@ -64,7 +64,6 @@ describe('chunker', function() {
 	});
 
 	const testChunking = co.wrap(function*(doPassThrough) {
-		//this.timeout(5000);
 		const params = [
 			 {inputSize: 0, chunkSize: 1}
 			,{inputSize: 1, chunkSize: 1}
@@ -97,8 +96,8 @@ describe('chunker', function() {
 			let count = 0;
 			for(let chunkStream of chunker.chunk(inputStream, chunkSize)) {
 				//console.log({count, chunkStream});
-				let writeBuf = yield streamToBuffer(chunkStream);
-				//let writeBuf = yield streamToFileToBuffer(chunkStream);
+				//let writeBuf = yield streamToBuffer(chunkStream);
+				let writeBuf = yield streamToFileToBuffer(chunkStream);
 
 				if(count == Math.floor(input.length / chunkSize)) {
 					assert.deepEqual(input.slice(chunkSize * count), writeBuf);
@@ -115,10 +114,12 @@ describe('chunker', function() {
 	});
 
 	it('chunks a stream into smaller streams', function() {
+		this.timeout(6000);
 		return testChunking(false);
 	});
 
 	it('chunks a stream with extra buffering into smaller streams', function() {
+		this.timeout(6000);
 		return testChunking(true);
 	});
 });
