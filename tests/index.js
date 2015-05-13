@@ -5,6 +5,7 @@ const assert = require('assert');
 const fs = require('fs');
 const co = require('co');
 const os = require('os');
+const path = require('path');
 const crypto = require('crypto');
 
 function streamToBuffer(stream) {
@@ -16,6 +17,22 @@ function streamToBuffer(stream) {
 		stream.once('end', function() {
 			resolve(buf);
 		});
+	});
+}
+
+/**
+ * Like streamToBuffer, but use real files to create backpressure.
+ */
+function streamToFileToBuffer(stream) {
+	const tempFname = path.join(os.tmpdir(), 'chopshop-tests-' + Math.random());
+	const writeStream = fs.createWriteStream(tempFname);
+	return new Promise(function(resolve) {
+		writeStream.once('finish', function() {
+			const buf = fs.readFileSync(tempFname);
+			fs.unlinkSync(tempFname);
+			resolve(buf);
+		});
+		stream.pipe(writeStream);
 	});
 }
 
@@ -46,12 +63,15 @@ describe('chunker', function() {
 	});
 
 	it('chunks a stream into smaller streams', co.wrap(function*() {
+		this.timeout(5000);
+
 		const params = [
 			 {inputSize: 0, chunkSize: 1}
 			,{inputSize: 1, chunkSize: 1}
 			,{inputSize: 3, chunkSize: 2}
 			,{inputSize: 3, chunkSize: 10}
 			,{inputSize: 1024*1024, chunkSize: 100}
+			,{inputSize: 1024*1024, chunkSize: 100*1024}
 			,{inputSize: 1024*1024, chunkSize: 1024*1024*10}
 			,{inputSize: 1024*1024, chunkSize: 17*1024}
 			,{inputSize: 1024*1024*4.5, chunkSize: 1024*1024}
@@ -72,7 +92,8 @@ describe('chunker', function() {
 			let count = 0;
 			for(let chunkStream of chunker.chunk(inputStream, chunkSize)) {
 				//console.log({count, chunkStream});
-				let writeBuf = yield streamToBuffer(chunkStream);
+				//let writeBuf = yield streamToBuffer(chunkStream);
+				let writeBuf = yield streamToFileToBuffer(chunkStream);
 
 				if(count == Math.floor(input.length / chunkSize)) {
 					assert.deepEqual(input.slice(chunkSize * count), writeBuf);
