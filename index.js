@@ -86,11 +86,14 @@ function* chunk(inputStream, chunkSize) {
 	}
 	let lastChunk = null;
 	while(true) {
-		if(lastChunk && lastChunk._inputExhausted) {
-			return;
-		}
 		lastChunk = new Chunk(inputStream, chunkSize, lastChunk && lastChunk._remainder);
 		yield lastChunk;
+		if(lastChunk._inputExhausted) {
+			return;
+		}
+		if(!lastChunk._stopped) {
+			throw new Error("Can't yield another chunk until the previous chunk is fully read");
+		}
 	}
 }
 

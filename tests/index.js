@@ -29,6 +29,22 @@ describe('chunker', function() {
 		}
 	});
 
+	it('throws Error when asked to yield another chunk before the previous chunk is fully read', function() {
+		const input = crypto.pseudoRandomBytes(1024);
+		const tempfname = `${os.tmpdir()}/chunkertest`;
+		const f = fs.openSync(tempfname, 'w');
+		fs.writeSync(f, input, 0, input.length);
+		fs.closeSync(f);
+
+		const inputStream = fs.createReadStream(tempfname);
+
+		const iter = chunker.chunk(inputStream, 128);
+		iter.next();
+		assert.throws(function() {
+			iter.next();
+		}, /until the previous chunk is fully read/);
+	});
+
 	it('chunks a stream into smaller streams', co.wrap(function*() {
 		const params = [
 			 {inputSize: 0, chunkSize: 1}

@@ -53,6 +53,8 @@ co(function*() {
 			chunkStream.on('end', resolve);
 		});
 	}
+}).catch(function(e) {
+	console.error(e.stack);
 });
 ```
 
