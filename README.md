@@ -30,7 +30,7 @@ const chunk = require('chopshop').chunk;
 chunk(readableStream, maxBytes);
 ```
 
-`chunk` returns an iterable of readable streams no larger than `maxBytes`.  You must finish reading a chunk before you start reading the next chunk.
+`chunk` returns an iterable of readable streams, all `maxBytes` in size except for the last chunk.  You must finish reading a chunk before you start reading the next chunk.  If your input stream has 0 bytes, you still get one chunk.
 
 
 Example
