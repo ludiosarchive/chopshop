@@ -4,7 +4,9 @@ chopshop
 [![NPM version][npm-image]][npm-url]
 [![Build status][travis-image]][travis-url]
 
-chopshop takes an io.js readable [stream](https://iojs.org/api/stream.html) and yields a series of fixed-length streams.  This is particularly useful if you need to convert a file into multiple files of size N.
+chopshop takes an io.js readable [stream](https://iojs.org/api/stream.html)
+and yields a series of fixed-length streams.  This is particularly useful
+if you need to convert a file into multiple files of size N.
 
 
 Install
@@ -30,7 +32,10 @@ const chunk = require('chopshop').chunk;
 chunk(readableStream, maxBytes);
 ```
 
-`chunk` returns an iterable of readable streams, all `maxBytes` in size except for the last chunk.  You must finish reading a chunk before you start reading the next chunk.  If your input stream has 0 bytes, you still get one chunk.
+`chunk` returns an iterable of readable streams, all `maxBytes` in size
+except for the last chunk, which may be smaller.  You must finish reading
+a chunk before you start reading the next chunk.  If your input stream
+has 0 bytes, you still get one chunk with 0 bytes.
 
 
 Example
