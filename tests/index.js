@@ -63,7 +63,12 @@ describe('chunker', function() {
 		}, /until the previous chunk is fully read/);
 	});
 
-	const testChunking = co.wrap(function*(doPassThrough) {
+	const testChunking = co.wrap(function*(options) {
+		const insertPassThrough = options.insertPassThrough;
+		const writeChunksToFiles = options.writeChunksToFiles;
+		assert.equal(typeof insertPassThrough, "boolean");
+		assert.equal(typeof writeChunksToFiles, "boolean");
+
 		const params = [
 			 {inputSize: 0, chunkSize: 1}
 			,{inputSize: 1, chunkSize: 1}
@@ -87,9 +92,9 @@ describe('chunker', function() {
 			fs.closeSync(f);
 
 			let inputStream = fs.createReadStream(tempfname);
-			// If doPassThrough, pipe data through a PassThrough stream,
+			// If insertPassThrough, pipe data through a PassThrough stream,
 			// which changes the read size (?) and backpressure.
-			if(doPassThrough) {
+			if(insertPassThrough) {
 				const passThrough = new stream.PassThrough();
 				inputStream.pipe(passThrough);
 				inputStream = passThrough;
@@ -98,11 +103,15 @@ describe('chunker', function() {
 			let count = 0;
 			for(let chunkStream of chunker.chunk(inputStream, chunkSize)) {
 				//console.log({chunkStream});
-				// Use streamToFileToBuffer instead of streamToBuffer to add some
-				// backpressure.  Needed to catch the lack-of-'end'-event bug
-				// present in chopshop 0.1.2.
-				//let writeBuf = yield streamToBuffer(chunkStream);
-				let writeBuf = yield streamToFileToBuffer(chunkStream);
+				let writeBuf;
+				if(writeChunksToFiles) {
+					// Use streamToFileToBuffer instead of streamToBuffer to add some
+					// backpressure.  Needed to catch the lack-of-'end'-event bug
+					// present in chopshop 0.1.2.
+					writeBuf = yield streamToFileToBuffer(chunkStream);
+				} else {
+					writeBuf = yield streamToBuffer(chunkStream);
+				}
 
 				if(count == Math.floor(input.length / chunkSize)) {
 					assert.deepEqual(input.slice(chunkSize * count), writeBuf);
@@ -118,13 +127,21 @@ describe('chunker', function() {
 		}
 	});
 
-	it('chunks a stream into smaller streams', function() {
+	it('correctly chunks a stream, with chunks written to files', function() {
 		this.timeout(8000);
-		return testChunking(false);
+		return testChunking({insertPassThrough: false, writeChunksToFiles: true});
 	});
 
-	it('chunks a stream with extra buffering into smaller streams', function() {
+	it('correctly chunks a stream, with chunks written to Buffers', function() {
+		return testChunking({insertPassThrough: false, writeChunksToFiles: false});
+	});
+
+	it('correctly chunks a stream with extra buffering, with chunks written to files', function() {
 		this.timeout(8000);
-		return testChunking(true);
+		return testChunking({insertPassThrough: true, writeChunksToFiles: true});
+	});
+
+	it('correctly chunks a stream with extra buffering, with chunks written to Buffers', function() {
+		return testChunking({insertPassThrough: true, writeChunksToFiles: false});
 	});
 });
