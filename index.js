@@ -1,3 +1,4 @@
+"use strong";
 "use strict";
 
 const Readable = require('stream').Readable;
@@ -45,7 +46,7 @@ Chunk.prototype._inputReadable = function() {
 	if(this._stopped || !this._waiting) {
 		return;
 	}
-	var buf = this._inputStream.read();
+	const buf = this._inputStream.read();
 	if(buf === null) {
 		return;
 	}

@@ -1,3 +1,4 @@
+"use strong";
 "use strict";
 
 const chunker = require('..');
@@ -113,7 +114,7 @@ describe('chunker', function() {
 					writeBuf = yield streamToBuffer(chunkStream);
 				}
 
-				if(count == Math.floor(input.length / chunkSize)) {
+				if(count === Math.floor(input.length / chunkSize)) {
 					assert.deepEqual(input.slice(chunkSize * count), writeBuf);
 				} else {
 					assert.equal(writeBuf.length, chunkSize);

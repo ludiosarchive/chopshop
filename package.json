@@ -1,17 +1,24 @@
 {
   "name": "chopshop",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Chunks an io.js readable stream into multiple fixed-length streams",
   "homepage": "https://github.com/ludios/chopshop",
   "issues": "https://github.com/ludios/chopshop/issues",
-  "keywords": ["stream", "streams", "chunk", "chunker", "chunking"],
+  "keywords": [
+    "stream",
+    "streams",
+    "chunk",
+    "chunker",
+    "chunking"
+  ],
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha tests/*.js"
+    "test": "./node_modules/.bin/mocha tests/*.js",
+    "test-strong-mode": "iojs --strong_mode ./node_modules/.bin/_mocha tests/*.js"
   },
   "devDependencies": {
     "co": "^4.5.4",
-    "mocha": "^2.2.1"
+    "mocha": "^2.2.5"
   },
   "author": "Ivan Kozik",
   "license": "ISC",
