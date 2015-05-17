@@ -129,7 +129,7 @@ describe('chunker', function() {
 	});
 
 	it('correctly chunks a stream, with chunks written to files', function() {
-		this.timeout(8000);
+		this.timeout(20000);
 		return testChunking({insertPassThrough: false, writeChunksToFiles: true});
 	});
 
@@ -138,7 +138,7 @@ describe('chunker', function() {
 	});
 
 	it('correctly chunks a stream with extra buffering, with chunks written to files', function() {
-		this.timeout(8000);
+		this.timeout(20000);
 		return testChunking({insertPassThrough: true, writeChunksToFiles: true});
 	});
 
