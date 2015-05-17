@@ -13,11 +13,12 @@
   ],
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha tests/*.js",
+    "test": "./node_modules/.bin/mocha tests/*.js && ./node_modules/.bin/eslint .",
     "test-strong-mode": "iojs --strong_mode ./node_modules/.bin/_mocha tests/*.js"
   },
   "devDependencies": {
     "co": "^4.5.4",
+    "eslint": "^0.21.1",
     "mocha": "^2.2.5"
   },
   "author": "Ivan Kozik",

@@ -2,7 +2,6 @@
 "use strict";
 
 const Readable = require('stream').Readable;
-const util = require('util');
 
 class Chunk extends Readable {
 	constructor(count, inputStream, chunkSize, lastRemainder, lastInputExhausted) {

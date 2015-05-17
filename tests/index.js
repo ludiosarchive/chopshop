@@ -8,10 +8,10 @@ const co = require('co');
 const os = require('os');
 const path = require('path');
 const crypto = require('crypto');
-const stream = require('stream');
+const PassThrough = require('stream').PassThrough;
 
 function streamToBuffer(stream) {
-	return new Promise(function(resolve, reject) {
+	return new Promise(function(resolve) {
 		let buf = new Buffer(0);
 		stream.on('data', function(data) {
 			buf = Buffer.concat([buf, data]);
@@ -96,7 +96,7 @@ describe('chunker', function() {
 			// If insertPassThrough, pipe data through a PassThrough stream,
 			// which changes the read size (?) and backpressure.
 			if(insertPassThrough) {
-				const passThrough = new stream.PassThrough();
+				const passThrough = new PassThrough();
 				inputStream.pipe(passThrough);
 				inputStream = passThrough;
 			}
