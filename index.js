@@ -99,8 +99,12 @@ function* chunk(inputStream, chunkSize) {
 		inputStream.removeListener('end', _end);
 		inputStream.removeListener('readable', _readable);
 	}
-	inputStream.on('end', _end);
-	inputStream.on('readable', _readable);
+	// Do this on next tick, because 'readable' can fire synchronously
+	// while lastChunk is still null.
+	process.nextTick(function() {
+		inputStream.on('end', _end);
+		inputStream.on('readable', _readable);
+	});
 	while(true) {
 		lastChunk = new Chunk(
 			count,
