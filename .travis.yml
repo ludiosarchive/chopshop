@@ -1,6 +1,7 @@
 language: node_js
 node_js:
   - "iojs"
+  - "iojs-v2.3.4"
   - "iojs-v2.3.1"
   - "iojs-v2.2.1"
   - "iojs-v2.1.0"
