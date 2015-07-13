@@ -15,13 +15,18 @@ class Chunk extends Readable {
 		this._stopped = false;
 		this._waiting = false;
 		this._inputExhausted = false;
-		this._lastRemainderLength = lastRemainder && lastRemainder.length;
+		this._lastRemainder = lastRemainder;
 		this._lastInputExhausted = lastInputExhausted;
+	}
 
-		if(lastRemainder !== null) {
-			this._handleInputRead(lastRemainder);
+	// Initialization must be finished outside the constructor because of strong mode
+	init() {
+		if(this._lastRemainder !== null) {
+			this._handleInputRead(this._lastRemainder);
+			// Free immediately
+			this._lastRemainder = null;
 		}
-		if(lastInputExhausted) {
+		if(this._lastInputExhausted) {
 			this._inputEnd();
 		}
 	}
@@ -29,7 +34,6 @@ class Chunk extends Readable {
 	inspect() {
 		return `<Chunk #${this._count}` +
 			` read ${this._readBytes}/${this._chunkSize}` +
-			` lastRemainder.length=${this._lastRemainderLength}` +
 			` lastInputExhausted=${this._lastInputExhausted}` +
 			` waiting=${this._waiting}` +
 			` stopped=${this._stopped}` +
@@ -112,6 +116,7 @@ function* chunk(inputStream, chunkSize) {
 			chunkSize,
 			lastChunk && lastChunk._remainder,
 			lastChunk && lastChunk._inputExhausted);
+		lastChunk.init();
 		yield lastChunk;
 		if(lastChunk._inputExhausted && !lastChunk._remainder) {
 			_cleanup();

@@ -26,7 +26,7 @@ function streamToBuffer(stream) {
  * Like streamToBuffer, but use real files to create backpressure.
  */
 function streamToFileToBuffer(stream) {
-	const tempFname = path.join(os.tmpdir(), 'chopshop-tests-' + Math.random());
+	const tempFname = path.join(os.tmpdir(), 'chopshop-tests-' + String(Math.random()));
 	const writeStream = fs.createWriteStream(tempFname);
 	return new Promise(function(resolve) {
 		writeStream.once('finish', function() {
