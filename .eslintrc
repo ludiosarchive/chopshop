@@ -1,6 +1,6 @@
 {
 	"rules": {
-		"indent": [2, "tab"],
+		"indent": 0,
 
 		"linebreak-style": [2, "unix"],
 

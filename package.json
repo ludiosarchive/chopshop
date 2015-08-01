@@ -1,6 +1,6 @@
 {
   "name": "chopshop",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Chunks an io.js readable stream into multiple fixed-length streams",
   "homepage": "https://github.com/ludios/chopshop",
   "issues": "https://github.com/ludios/chopshop/issues",
