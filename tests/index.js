@@ -12,12 +12,12 @@ const PassThrough = require('stream').PassThrough;
 
 function streamToBuffer(stream) {
 	return new Promise(function(resolve) {
-		let buf = new Buffer(0);
+		let bufs = [];
 		stream.on('data', function(data) {
-			buf = Buffer.concat([buf, data]);
+			bufs.push(data);
 		});
 		stream.once('end', function() {
-			resolve(buf);
+			resolve(Buffer.concat(bufs));
 		});
 	});
 }
