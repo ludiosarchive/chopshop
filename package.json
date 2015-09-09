@@ -1,6 +1,6 @@
 {
   "name": "chopshop",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Chunks an io.js readable stream into multiple fixed-length streams",
   "homepage": "https://github.com/ludios/chopshop",
   "issues": "https://github.com/ludios/chopshop/issues",
@@ -14,7 +14,7 @@
   "main": "index.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha tests/*.js && ./node_modules/.bin/eslint .",
-    "test-strong-mode": "iojs --strong_mode ./node_modules/.bin/_mocha tests/*.js"
+    "test-strong-mode": "node --strong-mode ./node_modules/.bin/_mocha tests/*.js"
   },
   "devDependencies": {
     "co": "^4.6.0",
@@ -25,6 +25,7 @@
   "license": "ISC",
   "repository": "ludios/chopshop",
   "engines": {
-    "iojs": ">= 2.0.0"
+    "iojs": ">= 2.0.0",
+    "node": ">= 4.0.0"
   }
 }
