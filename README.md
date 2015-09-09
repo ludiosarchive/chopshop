@@ -4,7 +4,7 @@ chopshop
 [![NPM version][npm-image]][npm-url]
 [![Build status][travis-image]][travis-url]
 
-chopshop takes an io.js readable [stream](https://iojs.org/api/stream.html)
+chopshop takes a node readable [stream](https://nodejs.org/api/stream.html)
 and yields a series of fixed-length streams.  This is particularly useful
 if you need to convert a file into multiple files of size N.
 

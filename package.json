@@ -1,7 +1,7 @@
 {
   "name": "chopshop",
-  "version": "0.3.4",
-  "description": "Chunks an io.js readable stream into multiple fixed-length streams",
+  "version": "0.3.5",
+  "description": "Chunks a node readable stream into multiple fixed-length streams",
   "homepage": "https://github.com/ludios/chopshop",
   "issues": "https://github.com/ludios/chopshop/issues",
   "keywords": [
